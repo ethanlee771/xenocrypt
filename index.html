@@ -303,13 +303,18 @@
           moveFocus(currentIndex - 1);
           e.preventDefault();
         } else if (e.key === 'ArrowRight') {
-          let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
-          moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
+          // let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
+          // moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
+          // e.preventDefault();
+          moveFocus(currentIndex + 1);
           e.preventDefault();
         } else if (e.key === ' ') {
           e.preventDefault();
           updateSimilarInputs(' ', char);
           moveFocus(currentIndex + 1);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          
         }
       });
     }
