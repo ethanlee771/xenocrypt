@@ -103,26 +103,21 @@
     }
 
     .frequency-box {
-      padding: 8px;
+      padding: 4px;
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 4px;
-      min-width: 60px;
-    }
-
-    .cipher-char {
-      font-weight: bold;
-      font-size: 1.2em;
-      color: #007bff;
-    }
-
-    .mapped-char {
-      color: #28a745;
+      min-width: 30px;
+      height: 15px;
+      font-size: 0.8em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2px;
     }
 
     .frequency {
       color: #6c757d;
-      font-size: 0.9em;
     }
   </style>
 </head>
@@ -199,11 +194,7 @@
         .forEach(([char, freq]) => {
           const box = document.createElement('div');
           box.className = 'frequency-box';
-          box.innerHTML = `
-            <div class="cipher-char">${char.toUpperCase()}</div>
-            <div class="mapped-char">${mappings[char] || '-'}</div>
-            <div class="frequency">${freq}x</div>
-          `;
+          box.innerHTML = `<div class="frequency">${freq}</div>`;
           frequencyContainer.appendChild(box);
         });
     }
