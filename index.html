@@ -1,242 +1,256 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spanish Cipher Game</title>
-    <style>
-        body {
-            background-color: #ffffff;
-            color: #000000;
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        #game-container {
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            background: #f0f0f0;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        }
-        #cipher-text-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-            gap: 20px;
-        }
-        .word-container {
-            display: flex;
-        }
-        .letter-container {
-            display: flex;
-            flex-direction: column;
-        }
-        .cipher-box {
-            width: 30px;
-            text-align: center;
-            font-size: 1.2em;
-            padding: 5px;
-            background-color: #e0e0e0;
-            border-radius: 3px 3px 0 0;
-            border: 1px solid #ccc;
-            border-bottom: none;
-        }
-        .input-box {
-            width: 30px;
-            text-align: center;
-            font-size: 1.2em;
-            border: 1px solid #ccc;
-            padding: 5px;
-            background-color: #ffffff;
-            border-radius: 0 0 3px 3px;
-        }
-        .input-box:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-            background-color: #f0f8ff;
-        }
-        #submit-btn {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        #submit-btn:hover {
-            background: #0056b3;
-        }
-        #error-message {
-            color: red;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            margin-top: 10px;
-        }
-        #error-message.show {
-            opacity: 1;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xenocrypt Practice</title>
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #000000;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    #game-container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #cipher-text-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 20px;
+    }
+
+    .word-container {
+      display: flex;
+    }
+
+    .letter-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cipher-box {
+      width: 30px;
+      text-align: center;
+      font-size: 1.2em;
+      padding: 5px;
+      background-color: #e0e0e0;
+      border-radius: 3px 3px 0 0;
+      border: 1px solid #ccc;
+      border-bottom: none;
+    }
+
+    .input-box {
+      width: 30px;
+      text-align: center;
+      font-size: 1.2em;
+      border: 1px solid #ccc;
+      padding: 5px;
+      background-color: #ffffff;
+      border-radius: 0 0 3px 3px;
+    }
+
+    .input-box:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+      background-color: #f0f8ff;
+    }
+
+    #submit-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+
+    #submit-btn:hover {
+      background: #0056b3;
+    }
+
+    #error-message {
+      color: red;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+      margin-top: 10px;
+    }
+
+    #error-message.show {
+      opacity: 1;
+    }
+  </style>
 </head>
+
 <body>
-    <div id="game-container">
-        <h1>Spanish Aristocrat Cipher</h1>
-        <div id="cipher-text-container"></div>
-        <div id="input-area"></div>
-        <button id="submit-btn">Submit</button>
-        <p id="error-message">Incorrect! Try again.</p>
-    </div>
-    <script>
-        let originalText = "EL CONOCIMIENTO ES PODER";
-        let cipherMap = {};
-        let decipherMap = {};
-        let currentFocusIndex = 0;
-        let inputs = [];
+  <div id="game-container">
+    <h1>Spanish Aristocrat Cipher</h1>
+    <div id="cipher-text-container"></div>
+    <div id="input-area"></div>
+    <button id="submit-btn">Submit</button>
+    <p id="error-message">Incorrect! Try again.</p>
+  </div>
+  <script>
+    let originalText = "el conocimiento es poder";
+    let cipherMap = {};
+    let decipherMap = {};
+    let currentFocusIndex = 0;
+    let inputs = [];
 
-        function generateCipher() {
-            let alphabet = "abcdefghijklmnopqrstuvwxyz";
-            let shuffled = alphabet.split('').sort(() => Math.random() - 0.5).join('');
-            for (let i = 0; i < alphabet.length; i++) {
-                cipherMap[alphabet[i]] = shuffled[i];
-                decipherMap[shuffled[i]] = alphabet[i];
+    function generateCipher() {
+      let alphabet = "abcdefghijklmnopqrstuvwxyz";
+      let shuffled = alphabet.split('').sort(() => Math.random() - 0.5).join('');
+      for (let i = 0; i < alphabet.length; i++) {
+        cipherMap[alphabet[i]] = shuffled[i];
+        decipherMap[shuffled[i]] = alphabet[i];
+      }
+    }
+
+    function encodeText(text) {
+      return text.split('').map(char => cipherMap[char] || char).join('');
+    }
+
+    function updateSimilarInputs(value, cipherChar) {
+      inputs.forEach(input => {
+        if (input.dataset.cipher === cipherChar) {
+          input.value = value;
+        }
+      });
+    }
+
+    function findNextEmptyBox(startIndex) {
+      for (let i = startIndex; i < inputs.length; i++) {
+        if (!inputs[i].value) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    function moveFocus(index) {
+      if (index >= 0 && index < inputs.length) {
+        inputs[index].focus();
+        currentFocusIndex = index;
+      }
+    }
+
+    function displayCipherText() {
+      let cipherText = encodeText(originalText);
+      let cipherContainer = document.getElementById("cipher-text-container");
+      let inputArea = document.getElementById("input-area");
+      cipherContainer.innerHTML = '';
+      inputArea.innerHTML = '';
+      inputs = [];
+
+      let words = cipherText.split(' ');
+      words.forEach((word, wordIndex) => {
+        let wordContainer = document.createElement("div");
+        wordContainer.classList.add("word-container");
+
+        word.split('').forEach((char, charIndex) => {
+          let letterContainer = document.createElement("div");
+          letterContainer.classList.add("letter-container");
+
+          let cipherBox = document.createElement("span");
+          cipherBox.classList.add("cipher-box");
+          cipherBox.textContent = char.toUpperCase();
+          letterContainer.appendChild(cipherBox);
+
+          let input = document.createElement("input");
+          input.type = "text";
+          input.maxLength = 1;
+          input.classList.add("input-box");
+          input.dataset.cipher = char;
+          input.dataset.index = inputs.length;
+          inputs.push(input);
+          letterContainer.appendChild(input);
+          wordContainer.appendChild(letterContainer);
+
+          input.addEventListener('input', (e) => {
+            let value = e.target.value.toUpperCase();
+            if (value && value.length === 1) {
+              updateSimilarInputs(value, char);
+              let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
+              moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
             }
-        }
+          });
 
-        function encodeText(text) {
-            return text.split('').map(char => cipherMap[char] || char).join('');
-        }
+          input.addEventListener('keydown', (e) => {
+            let currentIndex = parseInt(e.target.dataset.index);
 
-        function updateSimilarInputs(value, cipherChar) {
-            inputs.forEach(input => {
-                if (input.dataset.cipher === cipherChar) {
-                    input.value = value;
-                }
-            });
-        }
-
-        function findNextEmptyBox(startIndex) {
-            for (let i = startIndex; i < inputs.length; i++) {
-                if (!inputs[i].value) {
-                    return i;
-                }
+            if (e.key === 'Backspace') {
+              if (e.target.value) {
+                updateSimilarInputs('', char);
+                e.preventDefault();
+              } else {
+                moveFocus(currentIndex - 1);
+                e.preventDefault();
+              }
+            } else if (e.key === 'ArrowLeft') {
+              moveFocus(currentIndex - 1);
+              e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+              let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
+              moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
+              e.preventDefault();
+            } else if (e.key === ' ') {
+              e.preventDefault();
+              updateSimilarInputs(' ', char);
+              moveFocus(currentIndex + 1);
             }
-            return -1;
-        }
+          });
 
-        function moveFocus(index) {
-            if (index >= 0 && index < inputs.length) {
-                inputs[index].focus();
-                currentFocusIndex = index;
-            }
-        }
-
-        function displayCipherText() {
-            let cipherText = encodeText(originalText);
-            let cipherContainer = document.getElementById("cipher-text-container");
-            let inputArea = document.getElementById("input-area");
-            cipherContainer.innerHTML = '';
-            inputArea.innerHTML = '';
-            inputs = [];
-            
-            let words = cipherText.split(' ');
-            words.forEach((word, wordIndex) => {
-                let wordContainer = document.createElement("div");
-                wordContainer.classList.add("word-container");
-                
-                word.split('').forEach((char, charIndex) => {
-                    let letterContainer = document.createElement("div");
-                    letterContainer.classList.add("letter-container");
-                    
-                    let cipherBox = document.createElement("span");
-                    cipherBox.classList.add("cipher-box");
-                    cipherBox.textContent = char.toUpperCase();
-                    letterContainer.appendChild(cipherBox);
-
-                    let input = document.createElement("input");
-                    input.type = "text";
-                    input.maxLength = 1;
-                    input.classList.add("input-box");
-                    input.dataset.cipher = char;
-                    input.dataset.index = inputs.length;
-                    inputs.push(input);
-                    letterContainer.appendChild(input);
-                    wordContainer.appendChild(letterContainer);
-                    
-                    input.addEventListener('input', (e) => {
-                        let value = e.target.value.toUpperCase();
-                        if (value && value.length === 1) {
-                            updateSimilarInputs(value, char);
-                            let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
-                            moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
-                        }
-                    });
-
-                    input.addEventListener('keydown', (e) => {
-                        let currentIndex = parseInt(e.target.dataset.index);
-                        
-                        if (e.key === 'Backspace') {
-                            if (e.target.value) {
-                                updateSimilarInputs('', char);
-                                e.preventDefault();
-                            } else {
-                                moveFocus(currentIndex - 1);
-                                e.preventDefault();
-                            }
-                        } else if (e.key === 'ArrowLeft') {
-                            moveFocus(currentIndex - 1);
-                            e.preventDefault();
-                        } else if (e.key === 'ArrowRight') {
-                            let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
-                            moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
-                            e.preventDefault();
-                        } else if (e.key === ' ') {
-                            e.preventDefault();
-                            updateSimilarInputs(' ', char);
-                            moveFocus(currentIndex + 1);
-                        }
-                    });
-
-                    });
-                cipherContainer.appendChild(wordContainer);
-            });
-        }
-
-        document.getElementById("submit-btn").addEventListener("click", function() {
-            let userAttempt = '';
-            let lastWasSpace = false;
-            
-            for (let input of inputs) {
-                if (input.dataset.cipher === ' ') {
-                    if (!lastWasSpace) {
-                        userAttempt += ' ';
-                        lastWasSpace = true;
-                    }
-                } else {
-                    userAttempt += (input.value || '?').toLowerCase();
-                    lastWasSpace = false;
-                }
-            }
-            
-            let errorMessage = document.getElementById("error-message");
-            if (userAttempt.toLowerCase() === originalText.toLowerCase()) {
-                alert("Correct! The quote is: " + originalText);
-                location.reload();
-            } else {
-                errorMessage.classList.add("show");
-                setTimeout(() => {
-                    errorMessage.classList.remove("show");
-                }, 1000);
-            }
         });
+        cipherContainer.appendChild(wordContainer);
+      });
+    }
 
-        generateCipher();
-        displayCipherText();
-        if (inputs.length > 0) {
-            inputs[0].focus();
+    document.getElementById("submit-btn").addEventListener("click", function () {
+      let userAttempt = '';
+      let lastWasSpace = false;
+
+      for (let input of inputs) {
+        if (input.dataset.cipher === ' ') {
+          if (!lastWasSpace) {
+            userAttempt += ' ';
+            lastWasSpace = true;
+          }
+        } else {
+          userAttempt += (input.value || '?').toLowerCase();
+          lastWasSpace = false;
         }
-    </script>
+      }
+
+      let errorMessage = document.getElementById("error-message");
+      let noSpaces = originalText.replace(/\s/g, '');
+      if (userAttempt.toLowerCase() === noSpaces.toLowerCase()) {
+        alert("Correct! The quote is: " + originalText);
+        location.reload();
+      } else {
+        errorMessage.classList.add("show");
+        setTimeout(() => {
+          errorMessage.classList.remove("show");
+        }, 1000);
+      }
+    });
+
+    generateCipher();
+    displayCipherText();
+    if (inputs.length > 0) {
+      inputs[0].focus();
+    }
+  </script>
 </body>
+
 </html>
