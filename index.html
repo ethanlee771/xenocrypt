@@ -22,39 +22,31 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
 
-    #alphabet-grid {
-      display: grid;
-      grid-template-columns: repeat(26, 1fr);
-      gap: 5px;
-      margin: 20px auto;
-      max-width: 1200px;
+    #cipher-text-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      gap: 20px;
     }
 
-    .letter-column {
+    .word-container {
+      display: flex;
+    }
+
+    .letter-container {
       display: flex;
       flex-direction: column;
-      align-items: center;
     }
 
-    .frequency-box {
-      width: 30px;
-      text-align: center;
-      padding: 5px;
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      margin-bottom: 5px;
-    }
-
-    .letter-box {
+    .cipher-box {
       width: 30px;
       text-align: center;
       font-size: 1.2em;
       padding: 5px;
       background-color: #e0e0e0;
+      border-radius: 3px 3px 0 0;
       border: 1px solid #ccc;
-      border-radius: 3px;
-      margin-bottom: 5px;
+      border-bottom: none;
     }
 
     .input-box {
@@ -138,13 +130,14 @@
 <body>
   <div id="game-container">
     <h1>Spanish Aristocrat Cipher</h1>
-    <div id="alphabet-grid"></div>
+    <div id="cipher-text-container"></div>
+    <div id="input-area"></div>
     <button id="submit-btn">Submit</button>
     <p id="error-message">Incorrect! Try again.</p>
+    <div id="frequency-container"></div>
   </div>
   <script>
     let originalText = "el conocimiento es poder";
-    let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let cipherMap = {};
     let decipherMap = {};
     let currentFocusIndex = 0;
@@ -215,78 +208,16 @@
         });
     }
 
-    function calculateFrequencies(text) {
-      const frequencies = {};
-      text.toUpperCase().split('').forEach(char => {
-        if (char >= 'A' && char <= 'Z') {
-          frequencies[char] = (frequencies[char] || 0) + 1;
-        }
-      });
-      return frequencies;
-    }
-
-    function displayAlphabetGrid() {
-      const grid = document.getElementById("alphabet-grid");
-      grid.innerHTML = '';
-      inputs = [];
-      const frequencies = calculateFrequencies(encodeText(originalText));
-
-      alphabet.split('').forEach(letter => {
-        const column = document.createElement("div");
-        column.className = "letter-column";
-
-        // Frequency box
-        const freqBox = document.createElement("div");
-        freqBox.className = "frequency-box";
-        freqBox.textContent = frequencies[letter] || 0;
-
-        // Letter box
-        const letterBox = document.createElement("div");
-        letterBox.className = "letter-box";
-        letterBox.textContent = letter;
-
-        // Input box
-        const input = document.createElement("input");
-        input.type = "text";
-        input.maxLength = 1;
-        input.className = "input-box";
-        input.dataset.letter = letter;
-        inputs.push(input);
-
-        input.addEventListener('input', (e) => {
-          let value = e.target.value.toUpperCase();
-          if (value && value.length === 1) {
-            let nextIndex = inputs.indexOf(e.target) + 1;
-            if (nextIndex < inputs.length) {
-              inputs[nextIndex].focus();
-            }
-          }
-        });
-
-        input.addEventListener('keydown', (e) => {
-          let currentIndex = inputs.indexOf(e.target);
-          if (e.key === 'ArrowLeft') {
-            if (currentIndex > 0) {
-              inputs[currentIndex - 1].focus();
-            }
-            e.preventDefault();
-          } else if (e.key === 'ArrowRight') {
-            if (currentIndex < inputs.length - 1) {
-              inputs[currentIndex + 1].focus();
-            }
-            e.preventDefault();
-          }
-        });
-
-        column.appendChild(freqBox);
-        column.appendChild(letterBox);
-        column.appendChild(input);
-        grid.appendChild(column);
-      });
-    }
-
     function displayCipherText() {
-      displayAlphabetGrid();
+      let cipherText = encodeText(originalText);
+      let cipherContainer = document.getElementById("cipher-text-container");
+      let inputArea = document.getElementById("input-area");
+      cipherContainer.innerHTML = '';
+      inputArea.innerHTML = '';
+      inputs = [];
+
+      let words = cipherText.split(' ');
+      words.forEach((word, wordIndex) => {
         let wordContainer = document.createElement("div");
         wordContainer.classList.add("word-container");
 
