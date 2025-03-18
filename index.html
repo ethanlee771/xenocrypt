@@ -205,9 +205,22 @@
         }
 
         document.getElementById("submit-btn").addEventListener("click", function() {
-            let userAttempt = inputs.map(input => (input.value || '?').toLowerCase()).join('');
+            let userAttempt = '';
+            let lastWasSpace = false;
+            
+            for (let input of inputs) {
+                if (input.dataset.cipher === ' ') {
+                    if (!lastWasSpace) {
+                        userAttempt += ' ';
+                        lastWasSpace = true;
+                    }
+                } else {
+                    userAttempt += (input.value || '?').toLowerCase();
+                    lastWasSpace = false;
+                }
+            }
+            
             let errorMessage = document.getElementById("error-message");
-
             if (userAttempt.toLowerCase() === originalText.toLowerCase()) {
                 alert("Correct! The quote is: " + originalText);
                 location.reload();
