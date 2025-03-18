@@ -113,11 +113,25 @@
     <p id="error-message">Incorrect! Try again.</p>
   </div>
   <script>
-    let originalText = "el conocimiento es poder";
+    let originalText = "";
     let cipherMap = {};
     let decipherMap = {};
     let currentFocusIndex = 0;
     let inputs = [];
+
+    async function loadRandomQuote() {
+      const response = await fetch('quotes.txt');
+      const text = await response.text();
+      const quotes = text.split('\n').filter(q => q.trim());
+      originalText = quotes[Math.floor(Math.random() * quotes.length)];
+      return normalizeText(originalText);
+    }
+
+    function normalizeText(text) {
+      return text.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
 
     function generateCipher() {
       let alphabet = "abcdefghijklmnopqrstuvwxyz";
@@ -166,7 +180,99 @@
       inputArea.innerHTML = '';
       inputs = [];
 
-      let words = cipherText.split(' ');
+      let characters = cipherText.split('');
+      let currentWord = document.createElement("div");
+      currentWord.classList.add("word-container");
+      
+      characters.forEach((char, index) => {
+        if (/[a-zA-Z]/.test(char)) {
+          let letterContainer = createLetterContainer(char, cipherText);
+          currentWord.appendChild(letterContainer);
+        } else if (char === ' ') {
+          if (currentWord.children.length > 0) {
+            cipherContainer.appendChild(currentWord);
+            currentWord = document.createElement("div");
+            currentWord.classList.add("word-container");
+          }
+        } else if (/[.,!?'-]/.test(char)) {
+          let punctContainer = document.createElement("div");
+          punctContainer.classList.add("letter-container");
+          let punctBox = document.createElement("span");
+          punctBox.classList.add("cipher-box");
+          punctBox.textContent = char;
+          punctContainer.appendChild(punctBox);
+          currentWord.appendChild(punctContainer);
+        }
+      });
+
+      if (currentWord.children.length > 0) {
+        cipherContainer.appendChild(currentWord);
+      }
+    }
+
+    function createLetterContainer(char, cipherText) {
+      let letterContainer = document.createElement("div");
+      letterContainer.classList.add("letter-container");
+
+      let cipherBox = document.createElement("span");
+      cipherBox.classList.add("cipher-box");
+      cipherBox.textContent = char.toUpperCase();
+      letterContainer.appendChild(cipherBox);
+
+      let input = document.createElement("input");
+      input.type = "text";
+      input.maxLength = 1;
+      input.classList.add("input-box");
+      input.dataset.cipher = char;
+      input.dataset.index = inputs.length;
+      inputs.push(input);
+      letterContainer.appendChild(input);
+
+      let freq = document.createElement("div");
+      freq.classList.add("frequency");
+      freq.textContent = (cipherText.match(new RegExp(char, "g")) || []).length;
+      letterContainer.appendChild(freq);
+
+      setupInputListeners(input, char);
+      
+      return letterContainer;
+    }
+
+    function setupInputListeners(input, char) {
+      input.addEventListener('input', (e) => {
+        let value = e.target.value.toUpperCase();
+        if (value && value.length === 1) {
+          updateSimilarInputs(value, char);
+          let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
+          moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
+        }
+      });
+
+      input.addEventListener('keydown', (e) => {
+        let currentIndex = parseInt(e.target.dataset.index);
+
+        if (e.key === 'Backspace') {
+          if (e.target.value) {
+            updateSimilarInputs('', char);
+            e.preventDefault();
+          } else {
+            moveFocus(currentIndex - 1);
+            e.preventDefault();
+          }
+        } else if (e.key === 'ArrowLeft') {
+          moveFocus(currentIndex - 1);
+          e.preventDefault();
+        } else if (e.key === 'ArrowRight') {
+          let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
+          moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
+          e.preventDefault();
+        } else if (e.key === ' ') {
+          e.preventDefault();
+          updateSimilarInputs(' ', char);
+          moveFocus(currentIndex + 1);
+        }
+      });
+    }
       words.forEach((word, wordIndex) => {
         let wordContainer = document.createElement("div");
         wordContainer.classList.add("word-container");
@@ -265,11 +371,16 @@
       }
     });
 
-    generateCipher();
-    displayCipherText();
-    if (inputs.length > 0) {
-      inputs[0].focus();
+    async function initialize() {
+      await loadRandomQuote();
+      generateCipher();
+      displayCipherText();
+      if (inputs.length > 0) {
+        inputs[0].focus();
+      }
     }
+
+    initialize();
   </script>
 </body>
 
