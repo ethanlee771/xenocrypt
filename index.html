@@ -14,12 +14,45 @@
     }
 
     #game-container {
-      max-width: 600px;
+      max-width: 1200px;
       margin: auto;
       padding: 20px;
       background: #f0f0f0;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #alphabet-grid {
+      display: grid;
+      grid-template-columns: repeat(26, 1fr);
+      gap: 5px;
+      margin: 20px 0;
+    }
+
+    .letter-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .frequency-display {
+      width: 30px;
+      text-align: center;
+      padding: 5px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      margin-bottom: 2px;
+    }
+
+    .alphabet-letter {
+      width: 30px;
+      text-align: center;
+      padding: 5px;
+      background-color: #e0e0e0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      margin-bottom: 2px;
     }
 
     #cipher-text-container {
@@ -129,7 +162,8 @@
 
 <body>
   <div id="game-container">
-    <h1>Spanish Aristocrat Cipher</h1>
+    <h1>Xenocrypt Practice</h1>
+    <div id="alphabet-grid"></div>
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
     <button id="submit-btn">Submit</button>
@@ -138,10 +172,50 @@
   </div>
   <script>
     let originalText = "el conocimiento es poder";
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let cipherMap = {};
     let decipherMap = {};
     let currentFocusIndex = 0;
     let inputs = [];
+
+    function displayAlphabetGrid() {
+      const grid = document.getElementById("alphabet-grid");
+      grid.innerHTML = '';
+      
+      // Calculate frequencies from cipher text
+      const cipherText = encodeText(originalText).toUpperCase();
+      const frequencies = {};
+      for (let char of cipherText) {
+        if (char >= 'A' && char <= 'Z') {
+          frequencies[char] = (frequencies[char] || 0) + 1;
+        }
+      }
+
+      // Create grid
+      for (let letter of alphabet) {
+        const column = document.createElement("div");
+        column.className = "letter-column";
+
+        const freq = document.createElement("div");
+        freq.className = "frequency-display";
+        freq.textContent = frequencies[letter] || 0;
+
+        const letterBox = document.createElement("div");
+        letterBox.className = "alphabet-letter";
+        letterBox.textContent = letter;
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.maxLength = 1;
+        input.className = "input-box";
+        input.style.width = "30px";
+
+        column.appendChild(freq);
+        column.appendChild(letterBox);
+        column.appendChild(input);
+        grid.appendChild(column);
+      }
+    }
 
     function generateCipher() {
       let alphabet = "abcdefghijklmnopqrstuvwxyz";
@@ -310,6 +384,7 @@
     });
 
     generateCipher();
+    displayAlphabetGrid();
     displayCipherText();
     updateFrequencyAnalysis();
     if (inputs.length > 0) {
