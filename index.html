@@ -1,16 +1,133 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spanish Cipher Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #game-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        #cipher-text-container, #input-area {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 20px 0;
+        }
+        .cipher-box, .input-box {
+            width: 30px;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 2px;
+            border: 1px solid #000;
+            padding: 5px;
+            background-color: #ffffff;
+        }
+        #submit-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #submit-btn:hover {
+            background: #0056b3;
+        }
+        #error-message {
+            color: red;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        #error-message.show {
+            opacity: 1;
+        }
+    </style>
 </head>
-
 <body>
-  Hello world
-  <script src="script.js"></script>
-</body>
+    <div id="game-container">
+        <h1>Spanish Aristocrat Cipher</h1>
+        <div id="cipher-text-container"></div>
+        <div id="input-area"></div>
+        <button id="submit-btn">Submit</button>
+        <p id="error-message" class="hidden">Incorrect! Try again.</p>
+    </div>
+    <script>
+        let originalText = "el conocimiento es poder";
+        let cipherMap = {};
+        let decipherMap = {};
 
+        function generateCipher() {
+            let alphabet = "abcdefghijklmnopqrstuvwxyz";
+            let shuffled = alphabet.split('').sort(() => Math.random() - 0.5).join('');
+            for (let i = 0; i < alphabet.length; i++) {
+                cipherMap[alphabet[i]] = shuffled[i];
+                decipherMap[shuffled[i]] = alphabet[i];
+            }
+        }
+
+        function encodeText(text) {
+            return text.split('').map(char => cipherMap[char] || char).join('');
+        }
+
+        function displayCipherText() {
+            let cipherText = encodeText(originalText);
+            let cipherContainer = document.getElementById("cipher-text-container");
+            let inputArea = document.getElementById("input-area");
+            cipherContainer.innerHTML = '';
+            inputArea.innerHTML = '';
+            
+            cipherText.split('').forEach(char => {
+                if (char === ' ') {
+                    cipherContainer.appendChild(document.createTextNode(' '));
+                    inputArea.appendChild(document.createTextNode(' '));
+                } else {
+                    let cipherBox = document.createElement("span");
+                    cipherBox.classList.add("cipher-box");
+                    cipherBox.textContent = char;
+                    cipherContainer.appendChild(cipherBox);
+
+                    let input = document.createElement("input");
+                    input.type = "text";
+                    input.maxLength = 1;
+                    input.classList.add("input-box");
+                    input.dataset.cipher = char;
+                    inputArea.appendChild(input);
+                }
+            });
+        }
+
+        document.getElementById("submit-btn").addEventListener("click", function() {
+            let inputs = document.querySelectorAll(".input-box");
+            let userAttempt = Array.from(inputs).map(input => input.value || '?').join('');
+            let decodedAttempt = userAttempt.split('').map(char => decipherMap[char] || char).join('');
+
+            if (decodedAttempt === originalText) {
+                alert("Correct! The quote is: " + originalText);
+                location.reload();
+            } else {
+                let errorMessage = document.getElementById("error-message");
+                errorMessage.classList.add("show");
+                setTimeout(() => {
+                    errorMessage.classList.remove("show");
+                }, 1000);
+            }
+        });
+
+        generateCipher();
+        displayCipherText();
+    </script>
+</body>
 </html>
