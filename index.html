@@ -273,73 +273,7 @@
         }
       });
     }
-      words.forEach((word, wordIndex) => {
-        let wordContainer = document.createElement("div");
-        wordContainer.classList.add("word-container");
-
-        word.split('').forEach((char, charIndex) => {
-          let letterContainer = document.createElement("div");
-          letterContainer.classList.add("letter-container");
-
-          let cipherBox = document.createElement("span");
-          cipherBox.classList.add("cipher-box");
-          cipherBox.textContent = char.toUpperCase();
-          letterContainer.appendChild(cipherBox);
-
-          let input = document.createElement("input");
-          input.type = "text";
-          input.maxLength = 1;
-          input.classList.add("input-box");
-          input.dataset.cipher = char;
-          input.dataset.index = inputs.length;
-          inputs.push(input);
-          letterContainer.appendChild(input);
-
-          // Add frequency display
-          let freq = document.createElement("div");
-          freq.classList.add("frequency");
-          freq.textContent = (cipherText.match(new RegExp(char, "g")) || []).length;
-          letterContainer.appendChild(freq);
-          
-          wordContainer.appendChild(letterContainer);
-
-          input.addEventListener('input', (e) => {
-            let value = e.target.value.toUpperCase();
-            if (value && value.length === 1) {
-              updateSimilarInputs(value, char);
-              let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
-              moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
-            }
-          });
-
-          input.addEventListener('keydown', (e) => {
-            let currentIndex = parseInt(e.target.dataset.index);
-
-            if (e.key === 'Backspace') {
-              if (e.target.value) {
-                updateSimilarInputs('', char);
-                e.preventDefault();
-              } else {
-                moveFocus(currentIndex - 1);
-                e.preventDefault();
-              }
-            } else if (e.key === 'ArrowLeft') {
-              moveFocus(currentIndex - 1);
-              e.preventDefault();
-            } else if (e.key === 'ArrowRight') {
-              let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
-              moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
-              e.preventDefault();
-            } else if (e.key === ' ') {
-              e.preventDefault();
-              updateSimilarInputs(' ', char);
-              moveFocus(currentIndex + 1);
-            }
-          });
-
-        });
-        cipherContainer.appendChild(wordContainer);
-      });
+      
     }
 
     document.getElementById("submit-btn").addEventListener("click", function () {
