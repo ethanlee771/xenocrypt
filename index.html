@@ -13,15 +13,19 @@
         }
         #game-container {
             max-width: 800px;
-            margin: 20px;
+            margin: 20px 20px 20px 60px;
             padding: 20px;
             background: #f0f0f0;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
+        h1 {
+            text-align: center;
+        }
         #frequency-table {
             margin-top: 20px;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 20px 0;
             font-size: 0.9em;
         }
         #frequency-table th, #frequency-table td {
@@ -99,7 +103,7 @@
 </head>
 <body>
     <div id="game-container">
-        <h1>Spanish Aristocrat Cipher</h1>
+        <h1>Xenocrypt Practice</h1>
         <div id="cipher-text-container"></div>
         <div id="input-area"></div>
         <button id="submit-btn">Submit</button>
