@@ -20,30 +20,37 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
-        #cipher-text-container, #input-area {
+        #cipher-text-container {
             display: flex;
             justify-content: center;
-            gap: 5px;
             margin: 20px 0;
+            gap: 20px;
+        }
+        .word-container {
+            display: flex;
+        }
+        .letter-container {
+            display: flex;
+            flex-direction: column;
         }
         .cipher-box {
             width: 30px;
             text-align: center;
             font-size: 1.2em;
-            margin: 2px;
             padding: 5px;
             background-color: #e0e0e0;
-            border-radius: 3px;
+            border-radius: 3px 3px 0 0;
+            border: 1px solid #ccc;
+            border-bottom: none;
         }
         .input-box {
             width: 30px;
             text-align: center;
             font-size: 1.2em;
-            margin: 2px;
             border: 1px solid #ccc;
             padding: 5px;
             background-color: #ffffff;
-            border-radius: 3px;
+            border-radius: 0 0 3px 3px;
         }
         .input-box:focus {
             outline: none;
@@ -125,15 +132,19 @@
             inputArea.innerHTML = '';
             inputs = [];
             
-            cipherText.split('').forEach((char, index) => {
-                if (char === ' ') {
-                    cipherContainer.appendChild(document.createTextNode(' '));
-                    inputArea.appendChild(document.createTextNode(' '));
-                } else {
+            let words = cipherText.split(' ');
+            words.forEach((word, wordIndex) => {
+                let wordContainer = document.createElement("div");
+                wordContainer.classList.add("word-container");
+                
+                word.split('').forEach((char, charIndex) => {
+                    let letterContainer = document.createElement("div");
+                    letterContainer.classList.add("letter-container");
+                    
                     let cipherBox = document.createElement("span");
                     cipherBox.classList.add("cipher-box");
                     cipherBox.textContent = char;
-                    cipherContainer.appendChild(cipherBox);
+                    letterContainer.appendChild(cipherBox);
 
                     let input = document.createElement("input");
                     input.type = "text";
@@ -142,6 +153,8 @@
                     input.dataset.cipher = char;
                     input.dataset.index = inputs.length;
                     inputs.push(input);
+                    letterContainer.appendChild(input);
+                    wordContainer.appendChild(letterContainer);
                     
                     input.addEventListener('input', (e) => {
                         let value = e.target.value.toLowerCase();
@@ -175,8 +188,8 @@
                         }
                     });
 
-                    inputArea.appendChild(input);
-                }
+                    });
+                cipherContainer.appendChild(wordContainer);
             });
         }
 
