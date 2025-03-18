@@ -81,6 +81,21 @@
       background: #0056b3;
     }
 
+    #hint-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
+      margin-left: 10px;
+    }
+
+    #hint-btn:hover {
+      background: #218838;
+    }
+
     #error-message {
       color: red;
       opacity: 0;
@@ -111,6 +126,7 @@
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
     <button id="submit-btn">Submit</button>
+    <button id="hint-btn">Reveal Vowels</button>
     <p id="error-message">Incorrect! Try again.</p>
   </div>
   <script>
@@ -312,6 +328,17 @@
         inputs[0].focus();
       }
     }
+
+    document.getElementById("hint-btn").addEventListener("click", function() {
+      const vowels = ['a', 'e', 'i', 'o', 'u'];
+      inputs.forEach(input => {
+        const originalChar = decipherMap[input.dataset.cipher];
+        if (vowels.includes(originalChar)) {
+          input.value = originalChar.toUpperCase();
+          updateSimilarInputs(originalChar.toUpperCase(), input.dataset.cipher);
+        }
+      });
+    });
 
     initialize();
   </script>
