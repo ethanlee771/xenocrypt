@@ -90,7 +90,7 @@
         <p id="error-message">Incorrect! Try again.</p>
     </div>
     <script>
-        let originalText = "EL CONOCIMIENTO ES PODER";
+        let originalText = "el conocimiento es poder";
         let cipherMap = {};
         let decipherMap = {};
         let currentFocusIndex = 0;
@@ -99,6 +99,7 @@
         function generateCipher() {
             let alphabet = "abcdefghijklmnopqrstuvwxyz";
             let shuffled = alphabet.split('').sort(() => Math.random() - 0.5).join('');
+            originalText = originalText.toLowerCase();
             for (let i = 0; i < alphabet.length; i++) {
                 cipherMap[alphabet[i]] = shuffled[i];
                 decipherMap[shuffled[i]] = alphabet[i];
@@ -207,8 +208,8 @@
         document.getElementById("submit-btn").addEventListener("click", function() {
             let userAttempt = inputs.map(input => (input.value || '?').toLowerCase()).join('');
             let errorMessage = document.getElementById("error-message");
-
-            if (userAttempt.toLowerCase() === originalText.toLowerCase()) {
+            let noSpacesOgText = originalText.replace(/\s/g, '');
+            if (userAttempt.toLowerCase() === noSpacesOgText.toLowerCase()) {
                 alert("Correct! The quote is: " + originalText);
                 location.reload();
             } else {
