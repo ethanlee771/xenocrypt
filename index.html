@@ -117,6 +117,15 @@
             });
         }
 
+        function findNextEmptyBox(startIndex) {
+            for (let i = startIndex; i < inputs.length; i++) {
+                if (!inputs[i].value) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         function moveFocus(index) {
             if (index >= 0 && index < inputs.length) {
                 inputs[index].focus();
@@ -143,7 +152,7 @@
                     
                     let cipherBox = document.createElement("span");
                     cipherBox.classList.add("cipher-box");
-                    cipherBox.textContent = char;
+                    cipherBox.textContent = char.toUpperCase();
                     letterContainer.appendChild(cipherBox);
 
                     let input = document.createElement("input");
@@ -157,10 +166,11 @@
                     wordContainer.appendChild(letterContainer);
                     
                     input.addEventListener('input', (e) => {
-                        let value = e.target.value.toLowerCase();
+                        let value = e.target.value.toUpperCase();
                         if (value && value.length === 1) {
                             updateSimilarInputs(value, char);
-                            moveFocus(parseInt(e.target.dataset.index) + 1);
+                            let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
+                            moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
                         }
                     });
 
@@ -179,7 +189,8 @@
                             moveFocus(currentIndex - 1);
                             e.preventDefault();
                         } else if (e.key === 'ArrowRight') {
-                            moveFocus(currentIndex + 1);
+                            let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
+                            moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
                             e.preventDefault();
                         } else if (e.key === ' ') {
                             e.preventDefault();
@@ -194,10 +205,10 @@
         }
 
         document.getElementById("submit-btn").addEventListener("click", function() {
-            let userAttempt = inputs.map(input => input.value || '?').join('');
+            let userAttempt = inputs.map(input => (input.value || '?').toLowerCase()).join('');
             let errorMessage = document.getElementById("error-message");
 
-            if (userAttempt === originalText) {
+            if (userAttempt.toLowerCase() === originalText.toLowerCase()) {
                 alert("Correct! The quote is: " + originalText);
                 location.reload();
             } else {
