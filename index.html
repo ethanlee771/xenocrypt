@@ -145,7 +145,7 @@
                     
                     input.addEventListener('input', (e) => {
                         let value = e.target.value.toLowerCase();
-                        if (value) {
+                        if (value && value.length === 1) {
                             updateSimilarInputs(value, char);
                             moveFocus(parseInt(e.target.dataset.index) + 1);
                         }
