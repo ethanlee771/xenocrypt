@@ -90,6 +90,40 @@
     #error-message.show {
       opacity: 1;
     }
+
+    #frequency-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f8f8;
+      border-radius: 5px;
+    }
+
+    .frequency-box {
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      min-width: 60px;
+    }
+
+    .cipher-char {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #007bff;
+    }
+
+    .mapped-char {
+      color: #28a745;
+    }
+
+    .frequency {
+      color: #6c757d;
+      font-size: 0.9em;
+    }
   </style>
 </head>
 
@@ -100,6 +134,7 @@
     <div id="input-area"></div>
     <button id="submit-btn">Submit</button>
     <p id="error-message">Incorrect! Try again.</p>
+    <div id="frequency-container"></div>
   </div>
   <script>
     let originalText = "el conocimiento es poder";
@@ -145,6 +180,34 @@
       }
     }
 
+    function updateFrequencyAnalysis() {
+      const frequencyContainer = document.getElementById("frequency-container");
+      const frequencies = {};
+      const mappings = {};
+      
+      inputs.forEach(input => {
+        const cipher = input.dataset.cipher;
+        if (cipher !== ' ') {
+          frequencies[cipher] = (frequencies[cipher] || 0) + 1;
+          mappings[cipher] = input.value.toUpperCase() || '';
+        }
+      });
+
+      frequencyContainer.innerHTML = '';
+      Object.entries(frequencies)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([char, freq]) => {
+          const box = document.createElement('div');
+          box.className = 'frequency-box';
+          box.innerHTML = `
+            <div class="cipher-char">${char.toUpperCase()}</div>
+            <div class="mapped-char">${mappings[char] || '-'}</div>
+            <div class="frequency">${freq}x</div>
+          `;
+          frequencyContainer.appendChild(box);
+        });
+    }
+
     function displayCipherText() {
       let cipherText = encodeText(originalText);
       let cipherContainer = document.getElementById("cipher-text-container");
@@ -181,6 +244,7 @@
             let value = e.target.value.toUpperCase();
             if (value && value.length === 1) {
               updateSimilarInputs(value, char);
+              updateFrequencyAnalysis();
               let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
               moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
             }
@@ -247,6 +311,7 @@
 
     generateCipher();
     displayCipherText();
+    updateFrequencyAnalysis();
     if (inputs.length > 0) {
       inputs[0].focus();
     }
