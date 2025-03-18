@@ -10,15 +10,31 @@
             background-color: #ffffff;
             color: #000000;
             font-family: Arial, sans-serif;
-            text-align: center;
         }
         #game-container {
-            max-width: 600px;
-            margin: auto;
+            max-width: 800px;
+            margin: 20px;
             padding: 20px;
             background: #f0f0f0;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        #frequency-table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        #frequency-table th, #frequency-table td {
+            border: 1px solid #ccc;
+            padding: 5px;
+            text-align: center;
+            width: 25px;
+        }
+        #frequency-table th {
+            background-color: #e0e0e0;
+        }
+        .freq-row {
+            background-color: #f8f8f8;
         }
         #cipher-text-container {
             display: flex;
@@ -88,6 +104,24 @@
         <div id="input-area"></div>
         <button id="submit-btn">Submit</button>
         <p id="error-message">Incorrect! Try again.</p>
+        <table id="frequency-table">
+            <tr>
+                <th>Frequency</th>
+                <th id="freq-headers"></th>
+            </tr>
+            <tr class="freq-row">
+                <td>Count</td>
+                <td id="freq-counts"></td>
+            </tr>
+            <tr>
+                <td>Cipher</td>
+                <td id="cipher-row"></td>
+            </tr>
+            <tr>
+                <td>Plain</td>
+                <td id="plain-row"></td>
+            </tr>
+        </table>
     </div>
     <script>
         let originalText = "el conocimiento es poder";
@@ -103,6 +137,41 @@
             for (let i = 0; i < alphabet.length; i++) {
                 cipherMap[alphabet[i]] = shuffled[i];
                 decipherMap[shuffled[i]] = alphabet[i];
+            }
+            updateFrequencyTable();
+        }
+
+        function updateFrequencyTable() {
+            const freqHeaders = document.getElementById('freq-headers');
+            const freqCounts = document.getElementById('freq-counts');
+            const cipherRow = document.getElementById('cipher-row');
+            const plainRow = document.getElementById('plain-row');
+            
+            let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            let frequencies = {};
+            let cipherText = encodeText(originalText).toUpperCase();
+            
+            // Initialize frequencies
+            alphabet.split('').forEach(char => frequencies[char] = 0);
+            
+            // Count frequencies
+            cipherText.split('').forEach(char => {
+                if (alphabet.includes(char)) frequencies[char]++;
+            });
+
+            // Create table cells
+            freqHeaders.innerHTML = alphabet.split('').map(char => `<th>${char}</th>`).join('');
+            freqCounts.innerHTML = alphabet.split('').map(char => `<td>${frequencies[char]}</td>`).join('');
+            cipherRow.innerHTML = alphabet.split('').map(char => `<td>${char}</td>`).join('');
+            plainRow.innerHTML = alphabet.split('').map(() => `<td>?</td>`).join('');
+        }
+
+        function updatePlainTextRow(value, cipher) {
+            const plainRow = document.getElementById('plain-row');
+            const cells = plainRow.getElementsByTagName('td');
+            const index = cipher.toUpperCase().charCodeAt(0) - 65;
+            if (index >= 0 && index < 26) {
+                cells[index].textContent = value ? value.toUpperCase() : '?';
             }
         }
 
@@ -170,6 +239,7 @@
                         let value = e.target.value.toUpperCase();
                         if (value && value.length === 1) {
                             updateSimilarInputs(value, char);
+                            updatePlainTextRow(value, char);
                             let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
                             moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
                         }
