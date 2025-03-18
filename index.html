@@ -91,32 +91,14 @@
       opacity: 1;
     }
 
-    #frequency-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-      padding: 15px;
-      background: #f8f8f8;
-      border-radius: 5px;
-    }
-
-    .frequency-box {
-      padding: 4px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      min-width: 30px;
-      height: 15px;
-      font-size: 0.8em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 2px;
-    }
-
     .frequency {
+      width: 30px;
+      text-align: center;
+      font-size: 0.8em;
+      padding: 3px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 0 0 3px 3px;
       color: #6c757d;
     }
   </style>
@@ -129,7 +111,6 @@
     <div id="input-area"></div>
     <button id="submit-btn">Submit</button>
     <p id="error-message">Incorrect! Try again.</p>
-    <div id="frequency-container"></div>
   </div>
   <script>
     let originalText = "el conocimiento es poder";
@@ -175,29 +156,7 @@
       }
     }
 
-    function updateFrequencyAnalysis() {
-      const frequencyContainer = document.getElementById("frequency-container");
-      const frequencies = {};
-      const mappings = {};
-      
-      inputs.forEach(input => {
-        const cipher = input.dataset.cipher;
-        if (cipher !== ' ') {
-          frequencies[cipher] = (frequencies[cipher] || 0) + 1;
-          mappings[cipher] = input.value.toUpperCase() || '';
-        }
-      });
-
-      frequencyContainer.innerHTML = '';
-      Object.entries(frequencies)
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([char, freq]) => {
-          const box = document.createElement('div');
-          box.className = 'frequency-box';
-          box.innerHTML = `<div class="frequency">${freq}</div>`;
-          frequencyContainer.appendChild(box);
-        });
-    }
+    
 
     function displayCipherText() {
       let cipherText = encodeText(originalText);
@@ -229,13 +188,19 @@
           input.dataset.index = inputs.length;
           inputs.push(input);
           letterContainer.appendChild(input);
+
+          // Add frequency display
+          let freq = document.createElement("div");
+          freq.classList.add("frequency");
+          freq.textContent = (cipherText.match(new RegExp(char, "g")) || []).length;
+          letterContainer.appendChild(freq);
+          
           wordContainer.appendChild(letterContainer);
 
           input.addEventListener('input', (e) => {
             let value = e.target.value.toUpperCase();
             if (value && value.length === 1) {
               updateSimilarInputs(value, char);
-              updateFrequencyAnalysis();
               let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
               moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
             }
@@ -302,7 +267,6 @@
 
     generateCipher();
     displayCipherText();
-    updateFrequencyAnalysis();
     if (inputs.length > 0) {
       inputs[0].focus();
     }
