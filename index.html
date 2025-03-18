@@ -96,6 +96,27 @@
       background: #218838;
     }
 
+    #reveal-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
+      margin-left: 10px;
+    }
+
+    #reveal-btn:hover {
+      background: #c82333;
+    }
+
+    #unused-letters {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #6c757d;
+    }
+
     #error-message {
       color: red;
       opacity: 0;
@@ -127,6 +148,8 @@
     <div id="input-area"></div>
     <button id="submit-btn">Submit</button>
     <button id="hint-btn">Reveal Vowels</button>
+    <button id="reveal-btn">Reveal Quote</button>
+    <div id="unused-letters"></div>
     <p id="error-message">Incorrect! Try again.</p>
   </div>
   <script>
@@ -340,7 +363,29 @@
       });
     });
 
+    document.getElementById("reveal-btn").addEventListener("click", function() {
+      Object.entries(decipherMap).forEach(([cipher, plain]) => {
+        inputs.forEach(input => {
+          if (input.dataset.cipher === cipher) {
+            input.value = plain.toUpperCase();
+          }
+        });
+      });
+    });
+
+    function updateUnusedLetters() {
+      const usedLetters = new Set(Array.from(inputs).map(input => input.value.toLowerCase()).filter(v => v));
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+      const unusedLetters = alphabet.split('').filter(letter => !usedLetters.has(letter));
+      document.getElementById('unused-letters').textContent = 'Unused letters: ' + unusedLetters.join(' ').toUpperCase();
+    }
+
+    inputs.forEach(input => {
+      input.addEventListener('input', updateUnusedLetters);
+    });
+
     initialize();
+    updateUnusedLetters();
   </script>
 </body>
 
