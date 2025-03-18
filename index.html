@@ -285,6 +285,7 @@
           updateSimilarInputs(value, char);
           let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
           moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
+          updateUnusedLetters();
         }
       });
 
@@ -384,10 +385,6 @@
       const unusedLetters = alphabet.split('').filter(letter => !usedLetters.has(letter));
       document.getElementById('unused-letters').textContent = 'Unused letters: ' + unusedLetters.join(' ').toUpperCase();
     }
-
-    inputs.forEach(input => {
-      input.addEventListener('input', updateUnusedLetters);
-    });
 
     initialize();
     updateUnusedLetters();
