@@ -143,7 +143,7 @@
 
 <body>
   <div id="game-container">
-    <h3>Attempt 4</h3>
+    <h3>Attempt 5</h3>
     <h1>Spanish Aristocrat Cipher</h1>
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
@@ -163,10 +163,9 @@
     function normalizeText(text) {
       return text
         .normalize("NFD") // Decomposes accented letters
-        .replace(/[\u0300-\u036f]/g, "") // Removes accents
-        .replace(/[.,!?'-]/g, "") // Removes punctuation but keeps spaces
-        .toLowerCase(); // Ensures case insensitivity
+        .replace(/[\u0300-\u036f]/g, ""); // Removes only the accent marks
     }
+
 
 
 
@@ -238,35 +237,70 @@
 
 
 
+    // function displayCipherText() {
+    //   let cipherText = encodeText(originalText);
+    //   let cipherContainer = document.getElementById("cipher-text-container");
+    //   let inputArea = document.getElementById("input-area");
+    //   cipherContainer.innerHTML = '';
+    //   inputArea.innerHTML = '';
+    //   inputs = [];
+
+    //   let characters = cipherText.split('');
+    //   let currentWord = document.createElement("div");
+    //   currentWord.classList.add("word-container");
+
+    //   characters.forEach((char, index) => {
+    //     if (/[a-zA-Z]/.test(char)) {
+    //       let letterContainer = createLetterContainer(char, cipherText);
+    //       currentWord.appendChild(letterContainer);
+    //     } else if (char === ' ') {
+    //       if (currentWord.children.length > 0) {
+    //         cipherContainer.appendChild(currentWord);
+    //         currentWord = document.createElement("div");
+    //         currentWord.classList.add("word-container");
+    //       }
+    //     } else if (/[.,!?'-]/.test(char)) {
+    //       let punctContainer = document.createElement("div");
+    //       punctContainer.classList.add("letter-container");
+    //       let punctBox = document.createElement("span");
+    //       punctBox.classList.add("cipher-box");
+    //       punctBox.textContent = char;
+    //       punctContainer.appendChild(punctBox);
+    //       currentWord.appendChild(punctContainer);
+    //     }
+    //   });
+
+    //   if (currentWord.children.length > 0) {
+    //     cipherContainer.appendChild(currentWord);
+    //   }
+    // }
+
     function displayCipherText() {
       let cipherText = encodeText(originalText);
       let cipherContainer = document.getElementById("cipher-text-container");
-      let inputArea = document.getElementById("input-area");
       cipherContainer.innerHTML = '';
-      inputArea.innerHTML = '';
       inputs = [];
 
-      let characters = cipherText.split('');
       let currentWord = document.createElement("div");
       currentWord.classList.add("word-container");
 
-      characters.forEach((char, index) => {
+      cipherText.split('').forEach((char, index) => {
         if (/[a-zA-Z]/.test(char)) {
-          let letterContainer = createLetterContainer(char, cipherText);
+          let letterContainer = createLetterContainer(char);
           currentWord.appendChild(letterContainer);
         } else if (char === ' ') {
-          if (currentWord.children.length > 0) {
-            cipherContainer.appendChild(currentWord);
-            currentWord = document.createElement("div");
-            currentWord.classList.add("word-container");
-          }
-        } else if (/[.,!?'-]/.test(char)) {
+          cipherContainer.appendChild(currentWord);
+          currentWord = document.createElement("div");
+          currentWord.classList.add("word-container");
+        } else {
           let punctContainer = document.createElement("div");
           punctContainer.classList.add("letter-container");
+
           let punctBox = document.createElement("span");
           punctBox.classList.add("cipher-box");
-          punctBox.textContent = char;
+          punctBox.textContent = char; // Keep punctuation visible
           punctContainer.appendChild(punctBox);
+
           currentWord.appendChild(punctContainer);
         }
       });
@@ -275,6 +309,7 @@
         cipherContainer.appendChild(currentWord);
       }
     }
+
 
     function createLetterContainer(char, cipherText) {
       let letterContainer = document.createElement("div");
@@ -348,11 +383,10 @@
 
     document.getElementById("submit-btn").addEventListener("click", function () {
       let userAttempt = inputs.map(input => input.value || '?').join('');
+      let cleanedUserAttempt = normalizeText(userAttempt);
+      let cleanedOriginal = normalizeText(originalText);
 
-      let normalizedOriginal = normalizeText(originalText);
-      let normalizedUserAttempt = normalizeText(userAttempt);
-
-      if (normalizedUserAttempt.replace(/\s+/g, ' ') === normalizedOriginal.replace(/\s+/g, ' ')) {
+      if (cleanedUserAttempt === cleanedOriginal) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
       } else {
@@ -363,6 +397,7 @@
         }, 1000);
       }
     });
+
 
 
 
