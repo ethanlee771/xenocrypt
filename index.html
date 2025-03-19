@@ -143,7 +143,7 @@
 
 <body>
   <div id="game-container">
-    <h3>Attempt 3</h3>
+    <h3>Attempt 4</h3>
     <h1>Spanish Aristocrat Cipher</h1>
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
@@ -162,11 +162,12 @@
 
     function normalizeText(text) {
       return text
-        .normalize("NFD") // Decomposes accented letters (e.g., á → a + ́)
-        .replace(/[\u0300-\u036f]/g, "") // Removes diacritics (accents)
-        .replace(/[^a-zA-Z0-9]/g, "") // Removes all non-alphanumeric characters
-        .toLowerCase(); // Ensures consistent casing
+        .normalize("NFD") // Decomposes accented letters
+        .replace(/[\u0300-\u036f]/g, "") // Removes accents
+        .replace(/[.,!?'-]/g, "") // Removes punctuation but keeps spaces
+        .toLowerCase(); // Ensures case insensitivity
     }
+
 
 
     function generateCipher() {
@@ -351,7 +352,7 @@
       let normalizedOriginal = normalizeText(originalText);
       let normalizedUserAttempt = normalizeText(userAttempt);
 
-      if (normalizedUserAttempt === normalizedOriginal) {
+      if (normalizedUserAttempt.replace(/\s+/g, ' ') === normalizedOriginal.replace(/\s+/g, ' ')) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
       } else {
@@ -362,6 +363,7 @@
         }, 1000);
       }
     });
+
 
 
 
