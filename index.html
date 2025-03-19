@@ -143,7 +143,7 @@
 
 <body>
   <div id="game-container">
-    <h3>Attempt 6</h3>
+    <h3>Attempt 7</h3>
     <h1>Spanish Aristocrat Cipher</h1>
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
@@ -174,26 +174,18 @@
       let shuffled;
 
       do {
-        shuffled = alphabet.split('').sort(() => Math.random() - 0.5);
-      } while (shuffled.some((char, i) => char === alphabet[i])); // Prevents self-mapping
+        shuffled = alphabet.split('').sort(() => Math.random() - 0.5); // Shuffle the alphabet
+      } while (shuffled.some((char, i) => char === alphabet[i])); // Ensure no letter maps to itself
 
-      cipherMap = {};
-      decipherMap = {};
+      cipherMap = {};  // Reset cipherMap
+      decipherMap = {}; // Reset decipherMap
 
       for (let i = 0; i < alphabet.length; i++) {
-        cipherMap[alphabet[i]] = shuffled[i];
-        decipherMap[shuffled[i]] = alphabet[i];
+        cipherMap[alphabet[i]] = shuffled[i]; // Map original letters to shuffled letters
+        decipherMap[shuffled[i]] = alphabet[i]; // Reverse the mapping for deciphering
       }
 
-      // **Extra Fix:** If first letter is still mapped to itself, swap it with another letter
-      if (cipherMap[alphabet[0]] === alphabet[0]) {
-        let swapIndex = (alphabet.indexOf(cipherMap[alphabet[0]]) + 1) % alphabet.length;
-        let temp = cipherMap[alphabet[0]];
-        cipherMap[alphabet[0]] = cipherMap[alphabet[swapIndex]];
-        cipherMap[alphabet[swapIndex]] = temp;
-      }
-      console.log("Cipher Map:", cipherMap);
-      console.log("Decipher Map:", decipherMap);
+      console.log("Cipher Map: ", cipherMap); // Debugging cipher map
     }
 
 
@@ -208,8 +200,12 @@
 
 
     function encodeText(text) {
-      return text.split('').map(char => cipherMap[char] || char).join('');
+      return text.split('').map(char => {
+        let lowerChar = char.toLowerCase();
+        return cipherMap[lowerChar] ? cipherMap[lowerChar] : char;
+      }).join('');
     }
+
 
     function updateSimilarInputs(value, cipherChar) {
       inputs.forEach(input => {
@@ -238,44 +234,42 @@
 
 
     function displayCipherText() {
-      let cipherText = encodeText(originalText);
+      let cipherText = encodeText(originalText);  // Get the ciphered version of the original text
       let cipherContainer = document.getElementById("cipher-text-container");
-      let inputArea = document.getElementById("input-area");
-      cipherContainer.innerHTML = '';
-      inputArea.innerHTML = '';
-      inputs = [];
+      cipherContainer.innerHTML = '';  // Clear any previous content
+      inputs = [];  // Reset inputs array
 
-      let characters = cipherText.split('');
       let currentWord = document.createElement("div");
       currentWord.classList.add("word-container");
 
-      characters.forEach((char, index) => {
-        if (/[a-zA-Z]/.test(char)) {
-          let letterContainer = createLetterContainer(char, cipherText);
+      cipherText.split('').forEach((char, index) => {
+        if (/[a-zA-Z]/.test(char)) {  // If it's a letter
+          let letterContainer = createLetterContainer(char);  // Create the letter container with an input field
           currentWord.appendChild(letterContainer);
-        } else if (char === ' ') {
-          if (currentWord.children.length > 0) {
-            cipherContainer.appendChild(currentWord);
-            currentWord = document.createElement("div");
-            currentWord.classList.add("word-container");
-          }
-        } else if (/[.,!?'-]/.test(char)) {
+        } else if (char === ' ') {  // If it's a space, start a new word
+          cipherContainer.appendChild(currentWord);
+          currentWord = document.createElement("div");
+          currentWord.classList.add("word-container");
+        } else {  // For punctuation
           let punctContainer = document.createElement("div");
           punctContainer.classList.add("letter-container");
+
           let punctBox = document.createElement("span");
           punctBox.classList.add("cipher-box");
-          punctBox.textContent = char;
+          punctBox.textContent = char;  // Display punctuation in a box
           punctContainer.appendChild(punctBox);
+
           currentWord.appendChild(punctContainer);
         }
       });
 
       if (currentWord.children.length > 0) {
-        cipherContainer.appendChild(currentWord);
+        cipherContainer.appendChild(currentWord);  // Add the final word
       }
     }
 
-    
+
+
 
     function createLetterContainer(char, cipherText) {
       let letterContainer = document.createElement("div");
