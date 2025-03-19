@@ -143,7 +143,7 @@
 
 <body>
   <div id="game-container">
-    <h3>Attempt 4</h3>
+    <h3>Attempt 8</h3>
     <h1>Spanish Aristocrat Cipher</h1>
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
@@ -349,10 +349,16 @@
     document.getElementById("submit-btn").addEventListener("click", function () {
       let userAttempt = inputs.map(input => input.value || '?').join('');
 
+      // Normalize both original text and user input for a more accurate comparison
       let normalizedOriginal = normalizeText(originalText);
       let normalizedUserAttempt = normalizeText(userAttempt);
 
-      if (normalizedUserAttempt.replace(/\s+/g, ' ') === normalizedOriginal.replace(/\s+/g, ' ')) {
+      // Debug: Log the values to check if the comparison logic is correct
+      console.log("Original: ", normalizedOriginal);
+      console.log("User Attempt: ", normalizedUserAttempt);
+
+      // Compare the normalized user input with the original
+      if (normalizedUserAttempt === normalizedOriginal) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
       } else {
@@ -363,6 +369,7 @@
         }, 1000);
       }
     });
+
 
 
 
