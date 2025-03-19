@@ -350,7 +350,7 @@
       let userAttempt = inputs.map(input => input.value || '?').join('');
 
       // Normalize both original text and user input for a more accurate comparison
-      let normalizedOriginal = normalizeText(originalText);
+      let normalizedOriginal = normalizeText(originalText).replace(/ /g, '');
       let normalizedUserAttempt = normalizeText(userAttempt);
 
       // Debug: Log the values to check if the comparison logic is correct
