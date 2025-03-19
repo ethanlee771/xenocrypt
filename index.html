@@ -143,7 +143,7 @@
 
 <body>
   <div id="game-container">
-    <h3>Attempt 7</h3>
+    <h3>Attempt 4</h3>
     <h1>Spanish Aristocrat Cipher</h1>
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
@@ -163,9 +163,10 @@
     function normalizeText(text) {
       return text
         .normalize("NFD") // Decomposes accented letters
-        .replace(/[\u0300-\u036f]/g, ""); // Removes only the accent marks
+        .replace(/[\u0300-\u036f]/g, "") // Removes accents
+        .replace(/[.,!?'-]/g, "") // Removes punctuation but keeps spaces
+        .toLowerCase(); // Ensures case insensitivity
     }
-
 
 
 
@@ -174,18 +175,26 @@
       let shuffled;
 
       do {
-        shuffled = alphabet.split('').sort(() => Math.random() - 0.5); // Shuffle the alphabet
-      } while (shuffled.some((char, i) => char === alphabet[i])); // Ensure no letter maps to itself
+        shuffled = alphabet.split('').sort(() => Math.random() - 0.5);
+      } while (shuffled.some((char, i) => char === alphabet[i])); // Prevents self-mapping
 
-      cipherMap = {};  // Reset cipherMap
-      decipherMap = {}; // Reset decipherMap
+      cipherMap = {};
+      decipherMap = {};
 
       for (let i = 0; i < alphabet.length; i++) {
-        cipherMap[alphabet[i]] = shuffled[i]; // Map original letters to shuffled letters
-        decipherMap[shuffled[i]] = alphabet[i]; // Reverse the mapping for deciphering
+        cipherMap[alphabet[i]] = shuffled[i];
+        decipherMap[shuffled[i]] = alphabet[i];
       }
 
-      console.log("Cipher Map: ", cipherMap); // Debugging cipher map
+      // **Extra Fix:** If first letter is still mapped to itself, swap it with another letter
+      if (cipherMap[alphabet[0]] === alphabet[0]) {
+        let swapIndex = (alphabet.indexOf(cipherMap[alphabet[0]]) + 1) % alphabet.length;
+        let temp = cipherMap[alphabet[0]];
+        cipherMap[alphabet[0]] = cipherMap[alphabet[swapIndex]];
+        cipherMap[alphabet[swapIndex]] = temp;
+      }
+      console.log("Cipher Map:", cipherMap);
+      console.log("Decipher Map:", decipherMap);
     }
 
 
@@ -200,12 +209,8 @@
 
 
     function encodeText(text) {
-      return text.split('').map(char => {
-        let lowerChar = char.toLowerCase();
-        return cipherMap[lowerChar] ? cipherMap[lowerChar] : char;
-      }).join('');
+      return text.split('').map(char => cipherMap[char] || char).join('');
     }
-
 
     function updateSimilarInputs(value, cipherChar) {
       inputs.forEach(input => {
@@ -234,42 +239,42 @@
 
 
     function displayCipherText() {
-      let cipherText = encodeText(originalText);  // Get the ciphered version of the original text
+      let cipherText = encodeText(originalText);
       let cipherContainer = document.getElementById("cipher-text-container");
-      cipherContainer.innerHTML = '';  // Clear any previous content
-      inputs = [];  // Reset inputs array
+      let inputArea = document.getElementById("input-area");
+      cipherContainer.innerHTML = '';
+      inputArea.innerHTML = '';
+      inputs = [];
 
+      let characters = cipherText.split('');
       let currentWord = document.createElement("div");
       currentWord.classList.add("word-container");
 
-      cipherText.split('').forEach((char, index) => {
-        if (/[a-zA-Z]/.test(char)) {  // If it's a letter
-          let letterContainer = createLetterContainer(char);  // Create the letter container with an input field
+      characters.forEach((char, index) => {
+        if (/[a-zA-Z]/.test(char)) {
+          let letterContainer = createLetterContainer(char, cipherText);
           currentWord.appendChild(letterContainer);
-        } else if (char === ' ') {  // If it's a space, start a new word
-          cipherContainer.appendChild(currentWord);
-          currentWord = document.createElement("div");
-          currentWord.classList.add("word-container");
-        } else {  // For punctuation
+        } else if (char === ' ') {
+          if (currentWord.children.length > 0) {
+            cipherContainer.appendChild(currentWord);
+            currentWord = document.createElement("div");
+            currentWord.classList.add("word-container");
+          }
+        } else if (/[.,!?'-]/.test(char)) {
           let punctContainer = document.createElement("div");
           punctContainer.classList.add("letter-container");
-
           let punctBox = document.createElement("span");
           punctBox.classList.add("cipher-box");
-          punctBox.textContent = char;  // Display punctuation in a box
+          punctBox.textContent = char;
           punctContainer.appendChild(punctBox);
-
           currentWord.appendChild(punctContainer);
         }
       });
 
       if (currentWord.children.length > 0) {
-        cipherContainer.appendChild(currentWord);  // Add the final word
+        cipherContainer.appendChild(currentWord);
       }
     }
-
-
-
 
     function createLetterContainer(char, cipherText) {
       let letterContainer = document.createElement("div");
@@ -343,10 +348,11 @@
 
     document.getElementById("submit-btn").addEventListener("click", function () {
       let userAttempt = inputs.map(input => input.value || '?').join('');
-      let cleanedUserAttempt = normalizeText(userAttempt);
-      let cleanedOriginal = normalizeText(originalText);
 
-      if (cleanedUserAttempt === cleanedOriginal) {
+      let normalizedOriginal = normalizeText(originalText);
+      let normalizedUserAttempt = normalizeText(userAttempt);
+
+      if (normalizedUserAttempt.replace(/\s+/g, ' ') === normalizedOriginal.replace(/\s+/g, ' ')) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
       } else {
@@ -357,7 +363,6 @@
         }, 1000);
       }
     });
-
 
 
 
