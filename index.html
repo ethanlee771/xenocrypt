@@ -337,7 +337,10 @@
 
       let errorMessage = document.getElementById("error-message");
 
-      if (userAttempt === originalText.toLowerCase()) {
+      // Normalize the original text before comparison
+      let normalizedOriginal = normalizeText(originalText.toLowerCase());
+
+      if (userAttempt === normalizedOriginal) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
       } else {
@@ -347,6 +350,7 @@
         }, 1000);
       }
     });
+
 
 
     async function initialize() {
