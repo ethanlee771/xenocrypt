@@ -159,28 +159,36 @@
     let currentFocusIndex = 0;
     let inputs = [];
 
-    async function loadRandomQuote() {
-      const response = await fetch('quotes.txt');
-      const text = await response.text();
-      const quotes = text.split('\n').filter(q => q.trim());
-      originalText = quotes[Math.floor(Math.random() * quotes.length)];
-      return normalizeText(originalText);
-    }
-
     function normalizeText(text) {
-      return text.toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+      return text.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Removes only the accent, keeps letters
     }
 
     function generateCipher() {
       let alphabet = "abcdefghijklmnopqrstuvwxyz";
-      let shuffled = alphabet.split('').sort(() => Math.random() - 0.5).join('');
+      let shuffled;
+
+      do {
+        shuffled = alphabet.split('').sort(() => Math.random() - 0.5);
+      } while (shuffled.some((char, i) => char === alphabet[i])); // Ensure no letter maps to itself
+
+      cipherMap = {};
+      decipherMap = {};
+
       for (let i = 0; i < alphabet.length; i++) {
         cipherMap[alphabet[i]] = shuffled[i];
         decipherMap[shuffled[i]] = alphabet[i];
       }
     }
+
+    async function loadRandomQuote() {
+      const response = await fetch('quotes.txt');
+      const text = await response.text();
+      const quotes = text.split('\n').filter(q => q.trim());
+      originalText = quotes[Math.floor(Math.random() * quotes.length)];
+      originalText = normalizeText(originalText); // Ensures proper normalization
+      return originalText;
+    }
+
 
     function encodeText(text) {
       return text.split('').map(char => cipherMap[char] || char).join('');
@@ -210,7 +218,7 @@
       }
     }
 
-    
+
 
     function displayCipherText() {
       let cipherText = encodeText(originalText);
@@ -223,7 +231,7 @@
       let characters = cipherText.split('');
       let currentWord = document.createElement("div");
       currentWord.classList.add("word-container");
-      
+
       characters.forEach((char, index) => {
         if (/[a-zA-Z]/.test(char)) {
           let letterContainer = createLetterContainer(char, cipherText);
@@ -274,7 +282,7 @@
       letterContainer.appendChild(freq);
 
       setupInputListeners(input, char);
-      
+
       return letterContainer;
     }
 
@@ -315,30 +323,21 @@
           moveFocus(currentIndex + 1);
         } else if (e.key === 'Enter') {
           e.preventDefault();
-          
+
         }
       });
     }
 
     document.getElementById("submit-btn").addEventListener("click", function () {
       let userAttempt = '';
-      let lastWasSpace = false;
 
-      for (let input of inputs) {
-        if (input.dataset.cipher === ' ') {
-          if (!lastWasSpace) {
-            userAttempt += ' ';
-            lastWasSpace = true;
-          }
-        } else {
-          userAttempt += (input.value || '?').toLowerCase();
-          lastWasSpace = false;
-        }
-      }
+      inputs.forEach(input => {
+        userAttempt += (input.value || '?').toLowerCase();
+      });
 
       let errorMessage = document.getElementById("error-message");
-      let noSpaces = originalText.replace(/\s/g, '');
-      if (userAttempt.toLowerCase() === noSpaces.toLowerCase()) {
+
+      if (userAttempt === originalText.toLowerCase()) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
       } else {
@@ -349,6 +348,7 @@
       }
     });
 
+
     async function initialize() {
       await loadRandomQuote();
       generateCipher();
@@ -358,7 +358,7 @@
       }
     }
 
-    document.getElementById("hint-btn").addEventListener("click", function() {
+    document.getElementById("hint-btn").addEventListener("click", function () {
       const vowels = ['a', 'e', 'i', 'o', 'u'];
       inputs.forEach(input => {
         const originalChar = decipherMap[input.dataset.cipher];
@@ -369,7 +369,7 @@
       });
     });
 
-    document.getElementById("reveal-btn").addEventListener("click", function() {
+    document.getElementById("reveal-btn").addEventListener("click", function () {
       Object.entries(decipherMap).forEach(([cipher, plain]) => {
         inputs.forEach(input => {
           if (input.dataset.cipher === cipher) {
