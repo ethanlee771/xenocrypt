@@ -143,7 +143,7 @@
 
 <body>
   <div id="game-container">
-    <h3>Attempt 8</h3>
+    <h3>Attempt 9</h3>
     <h1>Spanish Aristocrat Cipher</h1>
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
@@ -160,16 +160,16 @@
     let currentFocusIndex = 0;
     let inputs = [];
 
-    function normalizeText(text) {
+    // Function to normalize text for checking (ignores punctuation and spaces)
+    function normalizeTextForCheck(text) {
       return text
         .normalize("NFD") // Decomposes accented letters
         .replace(/[\u0300-\u036f]/g, "") // Removes accents
-        .replace(/[.,!?'-]/g, "") // Removes punctuation but keeps spaces
+        .replace(/[^\w\s]/g, "") // Removes punctuation
         .toLowerCase(); // Ensures case insensitivity
     }
 
-
-
+    // Function to generate a random cipher map
     function generateCipher() {
       let alphabet = "abcdefghijklmnopqrstuvwxyz";
       let shuffled;
@@ -193,51 +193,23 @@
         cipherMap[alphabet[0]] = cipherMap[alphabet[swapIndex]];
         cipherMap[alphabet[swapIndex]] = temp;
       }
-      console.log("Cipher Map:", cipherMap);
-      console.log("Decipher Map:", decipherMap);
     }
 
-
+    // Function to load a random quote
     async function loadRandomQuote() {
       const response = await fetch('quotes.txt');
       const text = await response.text();
       const quotes = text.split('\n').filter(q => q.trim());
       originalText = quotes[Math.floor(Math.random() * quotes.length)];
-      originalText = normalizeText(originalText); // Ensures proper normalization
       return originalText;
     }
 
-
+    // Function to encode the text using the cipher map
     function encodeText(text) {
       return text.split('').map(char => cipherMap[char] || char).join('');
     }
 
-    function updateSimilarInputs(value, cipherChar) {
-      inputs.forEach(input => {
-        if (input.dataset.cipher === cipherChar) {
-          input.value = value;
-        }
-      });
-    }
-
-    function findNextEmptyBox(startIndex) {
-      for (let i = startIndex; i < inputs.length; i++) {
-        if (!inputs[i].value) {
-          return i;
-        }
-      }
-      return -1;
-    }
-
-    function moveFocus(index) {
-      if (index >= 0 && index < inputs.length) {
-        inputs[index].focus();
-        currentFocusIndex = index;
-      }
-    }
-
-
-
+    // Function to update the inputs with the ciphered values
     function displayCipherText() {
       let cipherText = encodeText(originalText);
       let cipherContainer = document.getElementById("cipher-text-container");
@@ -260,7 +232,7 @@
             currentWord = document.createElement("div");
             currentWord.classList.add("word-container");
           }
-        } else if (/[.,!?'-]/.test(char)) {
+        } else if (/[.,!?'-]/.test(char)) {  // Display punctuation
           let punctContainer = document.createElement("div");
           punctContainer.classList.add("letter-container");
           let punctBox = document.createElement("span");
@@ -276,6 +248,7 @@
       }
     }
 
+    // Function to create letter containers for each ciphered character
     function createLetterContainer(char, cipherText) {
       let letterContainer = document.createElement("div");
       letterContainer.classList.add("letter-container");
@@ -304,14 +277,13 @@
       return letterContainer;
     }
 
+    // Function to set up input listeners for the user input
     function setupInputListeners(input, char) {
       input.addEventListener('input', (e) => {
         let value = e.target.value.toUpperCase();
         if (value && value.length === 1) {
-          updateSimilarInputs(value, char);
           let nextEmptyIndex = findNextEmptyBox(parseInt(e.target.dataset.index) + 1);
           moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : parseInt(e.target.dataset.index) + 1);
-          updateUnusedLetters();
         }
       });
 
@@ -320,7 +292,6 @@
 
         if (e.key === 'Backspace') {
           if (e.target.value) {
-            updateSimilarInputs('', char);
             e.preventDefault();
           } else {
             moveFocus(currentIndex - 1);
@@ -330,34 +301,38 @@
           moveFocus(currentIndex - 1);
           e.preventDefault();
         } else if (e.key === 'ArrowRight') {
-          // let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
-          // moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
-          // e.preventDefault();
           moveFocus(currentIndex + 1);
           e.preventDefault();
-        } else if (e.key === ' ') {
-          e.preventDefault();
-          updateSimilarInputs(' ', char);
-          moveFocus(currentIndex + 1);
-        } else if (e.key === 'Enter') {
-          e.preventDefault();
-
         }
       });
     }
 
+    // Function to find the next empty input box
+    function findNextEmptyBox(startIndex) {
+      for (let i = startIndex; i < inputs.length; i++) {
+        if (!inputs[i].value) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    // Function to move focus to the next input box
+    function moveFocus(index) {
+      if (index >= 0 && index < inputs.length) {
+        inputs[index].focus();
+      }
+    }
+
+    // Check the user input on submit
     document.getElementById("submit-btn").addEventListener("click", function () {
       let userAttempt = inputs.map(input => input.value || '?').join('');
 
-      // Normalize both original text and user input for a more accurate comparison
-      let normalizedOriginal = normalizeText(originalText);
-      let normalizedUserAttempt = normalizeText(userAttempt);
+      // Normalize both the original text and the user input for comparison (ignoring punctuation and spaces)
+      let normalizedOriginal = normalizeTextForCheck(originalText);
+      let normalizedUserAttempt = normalizeTextForCheck(userAttempt);
 
-      // Debug: Log the values to check if the comparison logic is correct
-      console.log("Original: ", normalizedOriginal);
-      console.log("User Attempt: ", normalizedUserAttempt);
-
-      // Compare the normalized user input with the original
+      // Check if the normalized versions (ignoring spaces and punctuation) are the same
       if (normalizedUserAttempt === normalizedOriginal) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
@@ -370,49 +345,15 @@
       }
     });
 
-
-
-
-
-    async function initialize() {
-      await loadRandomQuote();
+    // Initialize the game
+    async function initializeGame() {
       generateCipher();
+      await loadRandomQuote();
       displayCipherText();
-      if (inputs.length > 0) {
-        inputs[0].focus();
-      }
     }
 
-    document.getElementById("hint-btn").addEventListener("click", function () {
-      const vowels = ['a', 'e', 'i', 'o', 'u'];
-      inputs.forEach(input => {
-        const originalChar = decipherMap[input.dataset.cipher];
-        if (vowels.includes(originalChar)) {
-          input.value = originalChar.toUpperCase();
-          updateSimilarInputs(originalChar.toUpperCase(), input.dataset.cipher);
-        }
-      });
-    });
+    initializeGame();
 
-    document.getElementById("reveal-btn").addEventListener("click", function () {
-      Object.entries(decipherMap).forEach(([cipher, plain]) => {
-        inputs.forEach(input => {
-          if (input.dataset.cipher === cipher) {
-            input.value = plain.toUpperCase();
-          }
-        });
-      });
-    });
-
-    function updateUnusedLetters() {
-      const usedLetters = new Set(Array.from(inputs).map(input => input.value.toLowerCase()).filter(v => v));
-      const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-      const unusedLetters = alphabet.split('').filter(letter => !usedLetters.has(letter));
-      document.getElementById('unused-letters').textContent = 'Unused letters: ' + unusedLetters.join(' ').toUpperCase();
-    }
-
-    initialize();
-    updateUnusedLetters();
   </script>
 </body>
 
