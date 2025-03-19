@@ -237,70 +237,35 @@
 
 
 
-    // function displayCipherText() {
-    //   let cipherText = encodeText(originalText);
-    //   let cipherContainer = document.getElementById("cipher-text-container");
-    //   let inputArea = document.getElementById("input-area");
-    //   cipherContainer.innerHTML = '';
-    //   inputArea.innerHTML = '';
-    //   inputs = [];
-
-    //   let characters = cipherText.split('');
-    //   let currentWord = document.createElement("div");
-    //   currentWord.classList.add("word-container");
-
-    //   characters.forEach((char, index) => {
-    //     if (/[a-zA-Z]/.test(char)) {
-    //       let letterContainer = createLetterContainer(char, cipherText);
-    //       currentWord.appendChild(letterContainer);
-    //     } else if (char === ' ') {
-    //       if (currentWord.children.length > 0) {
-    //         cipherContainer.appendChild(currentWord);
-    //         currentWord = document.createElement("div");
-    //         currentWord.classList.add("word-container");
-    //       }
-    //     } else if (/[.,!?'-]/.test(char)) {
-    //       let punctContainer = document.createElement("div");
-    //       punctContainer.classList.add("letter-container");
-    //       let punctBox = document.createElement("span");
-    //       punctBox.classList.add("cipher-box");
-    //       punctBox.textContent = char;
-    //       punctContainer.appendChild(punctBox);
-    //       currentWord.appendChild(punctContainer);
-    //     }
-    //   });
-
-    //   if (currentWord.children.length > 0) {
-    //     cipherContainer.appendChild(currentWord);
-    //   }
-    // }
-
     function displayCipherText() {
       let cipherText = encodeText(originalText);
       let cipherContainer = document.getElementById("cipher-text-container");
+      let inputArea = document.getElementById("input-area");
       cipherContainer.innerHTML = '';
+      inputArea.innerHTML = '';
       inputs = [];
 
+      let characters = cipherText.split('');
       let currentWord = document.createElement("div");
       currentWord.classList.add("word-container");
 
-      cipherText.split('').forEach((char, index) => {
+      characters.forEach((char, index) => {
         if (/[a-zA-Z]/.test(char)) {
-          let letterContainer = createLetterContainer(char);
+          let letterContainer = createLetterContainer(char, cipherText);
           currentWord.appendChild(letterContainer);
         } else if (char === ' ') {
-          cipherContainer.appendChild(currentWord);
-          currentWord = document.createElement("div");
-          currentWord.classList.add("word-container");
-        } else {
+          if (currentWord.children.length > 0) {
+            cipherContainer.appendChild(currentWord);
+            currentWord = document.createElement("div");
+            currentWord.classList.add("word-container");
+          }
+        } else if (/[.,!?'-]/.test(char)) {
           let punctContainer = document.createElement("div");
           punctContainer.classList.add("letter-container");
-
           let punctBox = document.createElement("span");
           punctBox.classList.add("cipher-box");
-          punctBox.textContent = char; // Keep punctuation visible
+          punctBox.textContent = char;
           punctContainer.appendChild(punctBox);
-
           currentWord.appendChild(punctContainer);
         }
       });
@@ -310,6 +275,7 @@
       }
     }
 
+    
 
     function createLetterContainer(char, cipherText) {
       let letterContainer = document.createElement("div");
