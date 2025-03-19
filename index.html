@@ -143,6 +143,7 @@
 
 <body>
   <div id="game-container">
+    <h3>Attempt 3</h3>
     <h1>Spanish Aristocrat Cipher</h1>
     <div id="cipher-text-container"></div>
     <div id="input-area"></div>
@@ -160,8 +161,13 @@
     let inputs = [];
 
     function normalizeText(text) {
-      return text.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Removes only the accent, keeps letters
+      return text
+        .normalize("NFD") // Decomposes accented letters (e.g., á → a + ́)
+        .replace(/[\u0300-\u036f]/g, "") // Removes diacritics (accents)
+        .replace(/[^a-zA-Z0-9]/g, "") // Removes all non-alphanumeric characters
+        .toLowerCase(); // Ensures consistent casing
     }
+
 
     function generateCipher() {
       let alphabet = "abcdefghijklmnopqrstuvwxyz";
@@ -169,7 +175,7 @@
 
       do {
         shuffled = alphabet.split('').sort(() => Math.random() - 0.5);
-      } while (shuffled.some((char, i) => char === alphabet[i])); // Ensure no letter maps to itself
+      } while (shuffled.some((char, i) => char === alphabet[i])); // Prevents self-mapping
 
       cipherMap = {};
       decipherMap = {};
@@ -178,7 +184,18 @@
         cipherMap[alphabet[i]] = shuffled[i];
         decipherMap[shuffled[i]] = alphabet[i];
       }
+
+      // **Extra Fix:** If first letter is still mapped to itself, swap it with another letter
+      if (cipherMap[alphabet[0]] === alphabet[0]) {
+        let swapIndex = (alphabet.indexOf(cipherMap[alphabet[0]]) + 1) % alphabet.length;
+        let temp = cipherMap[alphabet[0]];
+        cipherMap[alphabet[0]] = cipherMap[alphabet[swapIndex]];
+        cipherMap[alphabet[swapIndex]] = temp;
+      }
+      console.log("Cipher Map:", cipherMap);
+      console.log("Decipher Map:", decipherMap);
     }
+
 
     async function loadRandomQuote() {
       const response = await fetch('quotes.txt');
@@ -329,21 +346,16 @@
     }
 
     document.getElementById("submit-btn").addEventListener("click", function () {
-      let userAttempt = '';
+      let userAttempt = inputs.map(input => input.value || '?').join('');
 
-      inputs.forEach(input => {
-        userAttempt += (input.value || '?').toLowerCase();
-      });
+      let normalizedOriginal = normalizeText(originalText);
+      let normalizedUserAttempt = normalizeText(userAttempt);
 
-      let errorMessage = document.getElementById("error-message");
-
-      // Normalize the original text before comparison
-      let normalizedOriginal = normalizeText(originalText.toLowerCase());
-
-      if (userAttempt === normalizedOriginal) {
+      if (normalizedUserAttempt === normalizedOriginal) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
       } else {
+        let errorMessage = document.getElementById("error-message");
         errorMessage.classList.add("show");
         setTimeout(() => {
           errorMessage.classList.remove("show");
