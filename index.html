@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
       font-family: Arial, sans-serif;
       text-align: center;
     }
+
     #game-container {
       max-width: 90%;
       margin: auto;
@@ -19,6 +21,7 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
+
     #cipher-text-container {
       display: flex;
       flex-wrap: wrap;
@@ -26,13 +29,16 @@
       margin: 20px 0;
       gap: 10px;
     }
+
     .word-container {
       display: flex;
     }
+
     .letter-container {
       display: flex;
       flex-direction: column;
     }
+
     .cipher-box {
       width: 30px;
       text-align: center;
@@ -43,6 +49,7 @@
       border: 1px solid #ccc;
       border-bottom: none;
     }
+
     .input-box {
       width: 30px;
       text-align: center;
@@ -52,12 +59,14 @@
       background-color: #ffffff;
       border-radius: 0 0 3px 3px;
     }
+
     .input-box:focus {
       outline: none;
       border-color: #007bff;
       box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
       background-color: #f0f8ff;
     }
+
     #submit-btn {
       background: #007bff;
       color: white;
@@ -67,9 +76,11 @@
       border-radius: 5px;
       margin-top: 20px;
     }
+
     #submit-btn:hover {
       background: #0056b3;
     }
+
     #hint-btn {
       background: #28a745;
       color: white;
@@ -80,9 +91,11 @@
       margin-top: 20px;
       margin-left: 10px;
     }
+
     #hint-btn:hover {
       background: #218838;
     }
+
     #reveal-btn {
       background: #dc3545;
       color: white;
@@ -93,23 +106,28 @@
       margin-top: 20px;
       margin-left: 10px;
     }
+
     #reveal-btn:hover {
       background: #c82333;
     }
+
     #unused-letters {
       margin-top: 20px;
       font-size: 1.2em;
       color: #6c757d;
     }
+
     #error-message {
       color: red;
       opacity: 0;
       transition: opacity 0.3s ease-in-out;
       margin-top: 10px;
     }
+
     #error-message.show {
       opacity: 1;
     }
+
     .frequency {
       width: 30px;
       text-align: center;
@@ -122,6 +140,7 @@
     }
   </style>
 </head>
+
 <body>
   <div id="game-container">
     <h1>Spanish Aristocrat Cipher</h1>
@@ -143,14 +162,15 @@
 
     function normalizeText(text, preservePunctuation = false) {
       let normalized = text
-        .normalize("NFD") // Decomposes accented letters
-        .replace(/[\u0300-\u036f]/g, ""); // Removes accents
-      
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
       if (!preservePunctuation) {
-        normalized = normalized.replace(/[.,!?'-]/g, ""); // Removes punctuation but keeps spaces
+        normalized = normalized.replace(/[.,!?':;-]/g, "");
+        console.log("After punctuation removal:", normalized);
+      } else {
+        console.log("Preserving punctuation:", normalized);
       }
-      
-      return normalized.toLowerCase(); // Ensures case insensitivity
+      return normalized.toLowerCase();
     }
 
     function generateCipher() {
@@ -183,10 +203,10 @@
       const response = await fetch('quotes.txt');
       const text = await response.text();
       const quotes = text.split('\n').filter(q => q.trim());
-      
+
       // Store the original text with punctuation intact
       originalText = quotes[Math.floor(Math.random() * quotes.length)];
-      
+
       return originalText; // Return the original text with punctuation
     }
 
@@ -229,7 +249,11 @@
       let normalizedText = normalizeText(originalText, true);
       // Encode the normalized text (only alphabetic chars will be transformed)
       let cipherText = encodeText(normalizedText);
-      
+
+      console.log("Original text for display:", originalText);
+      console.log("Normalized text for display:", normalizedText);
+      console.log("Cipher text for display:", cipherText);
+
       let cipherContainer = document.getElementById("cipher-text-container");
       let inputArea = document.getElementById("input-area");
       cipherContainer.innerHTML = '';
@@ -250,7 +274,7 @@
             currentWord = document.createElement("div");
             currentWord.classList.add("word-container");
           }
-        } else if (/[.,!?'-]/.test(char)) {
+        } else if (/[.,!?'-:;]/.test(char)) {
           let punctContainer = document.createElement("div");
           punctContainer.classList.add("letter-container");
           let punctBox = document.createElement("span");
@@ -332,18 +356,27 @@
     }
 
     document.getElementById("submit-btn").addEventListener("click", function () {
+      // Get the user's input
       let userAttempt = inputs.map(input => input.value || '?').join('');
-      
-      // For comparison, normalize both to remove punctuation
-      let normalizedOriginal = normalizeText(originalText, false).replace(/ /g, '');
-      let normalizedUserAttempt = normalizeText(userAttempt, false).replace(/ /g, '');
-      
-      // Debug: Log the values to check if the comparison logic is correct
-      console.log("Original: ", normalizedOriginal);
-      console.log("User Attempt: ", normalizedUserAttempt);
-      
+
+      // For comparison, normalize both texts
+      let normalizedOriginal = normalizeText(originalText, false);
+      let normalizedUserAttempt = normalizeText(userAttempt, false);
+
+      // Remove spaces for comparison
+      let cleanOriginal = normalizedOriginal.replace(/ /g, '');
+      let cleanUserAttempt = normalizedUserAttempt.replace(/ /g, '');
+
+      // Debug logs
+      console.log("Original text:", originalText);
+      console.log("Normalized original:", normalizedOriginal);
+      console.log("Clean original:", cleanOriginal);
+      console.log("User attempt:", userAttempt);
+      console.log("Normalized user attempt:", normalizedUserAttempt);
+      console.log("Clean user attempt:", cleanUserAttempt);
+
       // Compare the normalized versions
-      if (normalizedUserAttempt === normalizedOriginal) {
+      if (cleanUserAttempt === cleanOriginal) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
       } else {
@@ -354,8 +387,9 @@
         }, 1000);
       }
     });
-    
-    document.addEventListener('keydown', function(event) {
+
+
+    document.addEventListener('keydown', function (event) {
       if (event.key === 'Enter' && document.activeElement.tagName !== 'INPUT') {
         document.getElementById("submit-btn").click();
       }
@@ -405,4 +439,5 @@
     updateUnusedLetters();
   </script>
 </body>
+
 </html>
