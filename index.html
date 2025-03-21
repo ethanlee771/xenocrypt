@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +11,6 @@
       font-family: Arial, sans-serif;
       text-align: center;
     }
-
     #game-container {
       max-width: 90%;
       margin: auto;
@@ -21,7 +19,6 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     }
-
     #cipher-text-container {
       display: flex;
       flex-wrap: wrap;
@@ -29,16 +26,13 @@
       margin: 20px 0;
       gap: 10px;
     }
-
     .word-container {
       display: flex;
     }
-
     .letter-container {
       display: flex;
       flex-direction: column;
     }
-
     .cipher-box {
       width: 30px;
       text-align: center;
@@ -49,7 +43,6 @@
       border: 1px solid #ccc;
       border-bottom: none;
     }
-
     .input-box {
       width: 30px;
       text-align: center;
@@ -59,14 +52,12 @@
       background-color: #ffffff;
       border-radius: 0 0 3px 3px;
     }
-
     .input-box:focus {
       outline: none;
       border-color: #007bff;
       box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
       background-color: #f0f8ff;
     }
-
     #submit-btn {
       background: #007bff;
       color: white;
@@ -76,11 +67,9 @@
       border-radius: 5px;
       margin-top: 20px;
     }
-
     #submit-btn:hover {
       background: #0056b3;
     }
-
     #hint-btn {
       background: #28a745;
       color: white;
@@ -91,11 +80,9 @@
       margin-top: 20px;
       margin-left: 10px;
     }
-
     #hint-btn:hover {
       background: #218838;
     }
-
     #reveal-btn {
       background: #dc3545;
       color: white;
@@ -106,28 +93,23 @@
       margin-top: 20px;
       margin-left: 10px;
     }
-
     #reveal-btn:hover {
       background: #c82333;
     }
-
     #unused-letters {
       margin-top: 20px;
       font-size: 1.2em;
       color: #6c757d;
     }
-
     #error-message {
       color: red;
       opacity: 0;
       transition: opacity 0.3s ease-in-out;
       margin-top: 10px;
     }
-
     #error-message.show {
       opacity: 1;
     }
-
     .frequency {
       width: 30px;
       text-align: center;
@@ -140,7 +122,6 @@
     }
   </style>
 </head>
-
 <body>
   <div id="game-container">
     <h1>Spanish Aristocrat Cipher</h1>
@@ -152,6 +133,7 @@
     <div id="unused-letters"></div>
     <p id="error-message">Incorrect! Try again.</p>
   </div>
+
   <script>
     let originalText = "";
     let cipherMap = {};
@@ -159,27 +141,27 @@
     let currentFocusIndex = 0;
     let inputs = [];
 
-    function normalizeText(text) {
-      return text
+    function normalizeText(text, preservePunctuation = false) {
+      let normalized = text
         .normalize("NFD") // Decomposes accented letters
-        .replace(/[\u0300-\u036f]/g, "") // Removes accents
-        .replace(/[.,!?'-]/g, "") // Removes punctuation but keeps spaces
-        .toLowerCase(); // Ensures case insensitivity
+        .replace(/[\u0300-\u036f]/g, ""); // Removes accents
+      
+      if (!preservePunctuation) {
+        normalized = normalized.replace(/[.,!?'-]/g, ""); // Removes punctuation but keeps spaces
+      }
+      
+      return normalized.toLowerCase(); // Ensures case insensitivity
     }
-
-
 
     function generateCipher() {
       let alphabet = "abcdefghijklmnopqrstuvwxyz";
       let shuffled;
-
       do {
         shuffled = alphabet.split('').sort(() => Math.random() - 0.5);
       } while (shuffled.some((char, i) => char === alphabet[i])); // Prevents self-mapping
 
       cipherMap = {};
       decipherMap = {};
-
       for (let i = 0; i < alphabet.length; i++) {
         cipherMap[alphabet[i]] = shuffled[i];
         decipherMap[shuffled[i]] = alphabet[i];
@@ -192,23 +174,30 @@
         cipherMap[alphabet[0]] = cipherMap[alphabet[swapIndex]];
         cipherMap[alphabet[swapIndex]] = temp;
       }
+
       console.log("Cipher Map:", cipherMap);
       console.log("Decipher Map:", decipherMap);
     }
-
 
     async function loadRandomQuote() {
       const response = await fetch('quotes.txt');
       const text = await response.text();
       const quotes = text.split('\n').filter(q => q.trim());
+      
+      // Store the original text with punctuation intact
       originalText = quotes[Math.floor(Math.random() * quotes.length)];
-      originalText = normalizeText(originalText); // Ensures proper normalization
-      return originalText;
+      
+      return originalText; // Return the original text with punctuation
     }
 
-
     function encodeText(text) {
-      return text.split('').map(char => cipherMap[char] || char).join('');
+      return text.split('').map(char => {
+        // Only encode lowercase alphabetic characters
+        if (/[a-z]/.test(char)) {
+          return cipherMap[char] || char;
+        }
+        return char; // Keep punctuation, spaces, and other characters as is
+      }).join('');
     }
 
     function updateSimilarInputs(value, cipherChar) {
@@ -235,10 +224,12 @@
       }
     }
 
-
-
     function displayCipherText() {
-      let cipherText = encodeText(originalText);
+      // Normalize the text but preserve punctuation for display
+      let normalizedText = normalizeText(originalText, true);
+      // Encode the normalized text (only alphabetic chars will be transformed)
+      let cipherText = encodeText(normalizedText);
+      
       let cipherContainer = document.getElementById("cipher-text-container");
       let inputArea = document.getElementById("input-area");
       cipherContainer.innerHTML = '';
@@ -299,7 +290,6 @@
       letterContainer.appendChild(freq);
 
       setupInputListeners(input, char);
-
       return letterContainer;
     }
 
@@ -316,7 +306,6 @@
 
       input.addEventListener('keydown', (e) => {
         let currentIndex = parseInt(e.target.dataset.index);
-
         if (e.key === 'Backspace') {
           if (e.target.value) {
             updateSimilarInputs('', char);
@@ -329,9 +318,6 @@
           moveFocus(currentIndex - 1);
           e.preventDefault();
         } else if (e.key === 'ArrowRight') {
-          // let nextEmptyIndex = findNextEmptyBox(currentIndex + 1);
-          // moveFocus(nextEmptyIndex !== -1 ? nextEmptyIndex : currentIndex + 1);
-          // e.preventDefault();
           moveFocus(currentIndex + 1);
           e.preventDefault();
         } else if (e.key === ' ') {
@@ -340,23 +326,22 @@
           moveFocus(currentIndex + 1);
         } else if (e.key === 'Enter') {
           e.preventDefault();
-
         }
       });
     }
 
     document.getElementById("submit-btn").addEventListener("click", function () {
       let userAttempt = inputs.map(input => input.value || '?').join('');
-
-      // Normalize both original text and user input for a more accurate comparison
-      let normalizedOriginal = normalizeText(originalText).replace(/ /g, '');
-      let normalizedUserAttempt = normalizeText(userAttempt);
-
+      
+      // For comparison, normalize both to remove punctuation
+      let normalizedOriginal = normalizeText(originalText, false).replace(/ /g, '');
+      let normalizedUserAttempt = normalizeText(userAttempt, false).replace(/ /g, '');
+      
       // Debug: Log the values to check if the comparison logic is correct
       console.log("Original: ", normalizedOriginal);
       console.log("User Attempt: ", normalizedUserAttempt);
-
-      // Compare the normalized user input with the original
+      
+      // Compare the normalized versions
       if (normalizedUserAttempt === normalizedOriginal) {
         alert("Correct! The quote is: " + originalText);
         location.reload();
@@ -368,10 +353,6 @@
         }, 1000);
       }
     });
-
-
-
-
 
     async function initialize() {
       await loadRandomQuote();
@@ -391,6 +372,7 @@
           updateSimilarInputs(originalChar.toUpperCase(), input.dataset.cipher);
         }
       });
+      updateUnusedLetters();
     });
 
     document.getElementById("reveal-btn").addEventListener("click", function () {
@@ -401,6 +383,7 @@
           }
         });
       });
+      updateUnusedLetters();
     });
 
     function updateUnusedLetters() {
@@ -414,5 +397,4 @@
     updateUnusedLetters();
   </script>
 </body>
-
 </html>
